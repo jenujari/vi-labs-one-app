@@ -1,0 +1,26 @@
+FROM golang:1.25-bookworm
+
+# Install Delve
+RUN CGO_ENABLED=0 go install -ldflags "-s -w -extldflags '-static'" github.com/go-delve/delve/cmd/dlv@latest
+RUN go install github.com/air-verse/air@latest
+
+# Expose application port (e.g., 5859) and Delve port (4000)
+EXPOSE 5859 4000
+
+WORKDIR /app
+
+# Copy go.mod and go.sum for dependency management
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the source code
+COPY . .
+
+# ENV CGO_ENABLED=1
+
+# Build the Go application with debug flags to disable optimizations
+# RUN CGO_ENABLED=0 go build -gcflags "all=-N -l" -o server_app .
+
+ENTRYPOINT ["air"]
+# Run Delve in headless mode, listening on port 4000
+# CMD ["/go/bin/dlv", "--listen=:4000", "--headless=true", "--log=true", "--accept-multiclient", "--api-version=2", "exec", "/app/server_app"]

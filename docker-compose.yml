@@ -1,0 +1,26 @@
+
+services:
+  server:
+    image: server-app
+    container_name: server-app
+    environment:
+      - VAR_ONE=${VAR_ONE}
+    ports:
+      - "5859:5859"
+    volumes:
+      - fs-data:/data
+      # - fs-server:/app:rw
+
+volumes:
+  fs-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./data
+      o: bind
+  fs-server:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./server
+      o: bind

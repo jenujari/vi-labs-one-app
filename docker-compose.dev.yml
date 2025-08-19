@@ -1,0 +1,17 @@
+
+services:
+  server:
+    image: server-app-debug
+    container_name: server-app-debug
+    build:
+      context: ./server/
+      dockerfile: Dockerfile.debug
+    develop:
+      watch:
+        - action: sync
+          path: ./server
+          target: /app
+          ignore:
+            - ./server/vendor
+    ports:
+      - "4000:4000"
