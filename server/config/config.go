@@ -11,6 +11,10 @@ type Config struct {
 		Path string `mapstructure:"path"`
 	} `mapstructure:"database"`
 	Secret struct {
-		V1 string `mapstructure:"v1"`
-	} `mapstructure:"secret"`
+		UserName  string
+		Password  string
+		Secret    string
+		ApiKey    string
+		ApiSecret string
+	}
 }

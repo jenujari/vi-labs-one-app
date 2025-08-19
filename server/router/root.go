@@ -30,7 +30,7 @@ func init() {
 
 	router = http.NewServeMux()
 
-	FileServer(router, "/static")
+	FileServer(router, "/assets/")
 	SetRoutes(router)
 
 	server.Handler = router

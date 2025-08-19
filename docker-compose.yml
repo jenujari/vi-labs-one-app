@@ -4,7 +4,11 @@ services:
     image: server-app
     container_name: server-app
     environment:
-      - VAR_ONE=${VAR_ONE}
+      - ZERODHA_USER=${ZERODHA_USER}
+      - ZERODHA_PASS=${ZERODHA_PASS}
+      - ZERODHA_SECRET=${ZERODHA_SECRET}
+      - ZERODHA_API_KEY=${ZERODHA_API_KEY}
+      - ZERODHA_API_SECRET=${ZERODHA_API_SECRET}
     ports:
       - "5859:5859"
     volumes:

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/goforj/godump"
+	// "github.com/goforj/godump"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 	"gorm.io/driver/sqlite"
@@ -44,7 +44,11 @@ func init() {
 		log.Fatalf("Error unmarshaling config: %v", err)
 	}
 
-	config.Secret.V1 = os.Getenv("VAR_ONE")
+	config.Secret.UserName = os.Getenv("ZERODHA_USER")
+	config.Secret.Password = os.Getenv("ZERODHA_PASS")
+	config.Secret.Secret = os.Getenv("ZERODHA_SECRET")
+	config.Secret.ApiKey = os.Getenv("ZERODHA_API_KEY")
+	config.Secret.ApiSecret = os.Getenv("ZERODHA_API_SECRET")
 
 	// init log system
 	logger = log.Default()
@@ -62,7 +66,7 @@ func init() {
 		logger.Panic("failed to connect database on path " + dbPATH + ": " + err.Error())
 	}
 
-	godump.Dump(config)
+	// godump.Dump(config)
 }
 
 func GetDBC() *gorm.DB {

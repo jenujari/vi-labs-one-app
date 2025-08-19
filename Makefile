@@ -45,6 +45,13 @@ up-build: server-build
 down:
 	docker compose down -v
 
+
+#  make goose CMD="status"    
+#  https://github.com/pressly/goose
+goose:
+	cd data && goose $(CMD)
+
+
 # all: build
 
 # build:
