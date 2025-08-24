@@ -2,3 +2,5 @@
 !.env.example
 data/db/data.db
 server/tpl
+data/pg-admin
+data/pgsql
