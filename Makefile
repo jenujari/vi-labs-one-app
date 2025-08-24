@@ -5,10 +5,16 @@ GO_VERSION = 1.25-bookworm
 # GO_VERSION = alpine3.22
 PWD_PATH = $(CURDIR)
 
+# Load .env file
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
+
 .PHONY: up
 
 t1:
-	echo ${PWD_PATH}
+	@echo "Running $(SEVEN_ZIP_PASSWORD)"
 
 test:
 	docker run --rm -it --name=test \
@@ -39,12 +45,15 @@ server-build:
 up:
 	docker compose  -f docker-compose.yml up -d
 
-up-build: server-build
+
+up-infra:
+	docker compose  -f docker-compose.yml up -d timescaledb pgadmin
+
+up-build: server-build up-infra
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build --watch
 
 down:
 	docker compose down -v
-
 
 #  make goose CMD="status"    
 #  https://github.com/pressly/goose
@@ -52,16 +61,17 @@ goose:
 	cd data && goose $(CMD)
 
 
-# all: build
+zip-pgadmin:
+	7z a -tzip -p$(SEVEN_ZIP_PASSWORD) -mem=AES256 pgadmin.zip ./data/pg-admin
 
-# build:
-# 	go build -o $(APP_NAME) .
+zip-pgsql:
+	7z a -tzip -p$(SEVEN_ZIP_PASSWORD) -mem=AES256 pgsql.zip ./data/pgsql
 
-# run: build
-# 	./$(APP_NAME)
+uzip-pgadmin:
+	7z x pgadmin.zip -p$(SEVEN_ZIP_PASSWORD) -o./data/pg-admin/restoration
+
+uzip-pgsql:
+	7z x pgsql.zip -p$(SEVEN_ZIP_PASSWORD) -o./data/pgsql/restoration
 
 # test:
 # 	go test ./...
-
-# clean:
-# 	rm -f $(APP_NAME)

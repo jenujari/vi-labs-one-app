@@ -1,11 +1,15 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE "tbl_seven_fifty" (
-	"id"	INTEGER PRIMARY KEY AUTOINCREMENT,
-	"symbol"	TEXT
+CREATE TABLE IF NOT EXISTS tbl_seven_fifty
+(
+    id smallserial NOT NULL,
+    symbol character varying(500) NOT NULL,
+    full_name text,
+    CONSTRAINT prime_id PRIMARY KEY (id),
+    CONSTRAINT unique_symbol UNIQUE (symbol)
 );
 
-INSERT INTO "tbl_seven_fifty" ("symbol") VALUES
+INSERT INTO tbl_seven_fifty ("symbol") VALUES
 ('360ONE'),
 ('3MINDIA'),
 ('AAVAS'),
@@ -773,5 +777,5 @@ INSERT INTO "tbl_seven_fifty" ("symbol") VALUES
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE "tbl_seven_fifty";
+DROP TABLE IF EXISTS tbl_seven_fifty;
 -- +goose StatementEnd

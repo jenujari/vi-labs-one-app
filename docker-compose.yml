@@ -14,13 +14,43 @@ services:
     volumes:
       - fs-data:/data
       # - fs-server:/app:rw
+  timescaledb:
+    image: timescale/timescaledb-ha:pg17
+    container_name: timescaledb
+    restart: always
+    environment:
+      - PGDATA=/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+    ports:
+      - "5432:5432"
+    volumes:
+      - fs-pgsql:/pgdata
+  pgadmin:
+    image: dpage/pgadmin4:snapshot
+    container_name: pgadmin4
+    restart: always
+    ports:
+      - "6464:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - fs-pgadmin:/var/lib/pgadmin
 
 volumes:
-  fs-data:
+  fs-pgsql:
     driver: local
     driver_opts:
       type: none
-      device: ./data
+      device: ./data/pgsql
+      o: bind
+  fs-pgadmin:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./data/pg-admin
       o: bind
   fs-server:
     driver: local
