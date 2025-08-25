@@ -1,28 +1,23 @@
 package config
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
 	// "github.com/goforj/godump"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/spf13/viper"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-)
 
-const (
-	DB_NAME = "data.db"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/spf13/viper"
 )
 
 
 var (
-	dbPATH  string
-	dirPATH string
-	dbc     *gorm.DB
-	logger  *log.Logger
-	config  *Config
+	dbc          *pgxpool.Pool
+	logger       *log.Logger
+	config       *Config
+	PGSQL_STRING = "postgres://%s:%s@%s:5432/%s"
 )
 
 func init() {
@@ -49,32 +44,49 @@ func init() {
 	config.Secret.Secret = os.Getenv("ZERODHA_SECRET")
 	config.Secret.ApiKey = os.Getenv("ZERODHA_API_KEY")
 	config.Secret.ApiSecret = os.Getenv("ZERODHA_API_SECRET")
+	config.Secret.POSTGRES_PASSWORD = os.Getenv("POSTGRES_PASSWORD")
+	config.Secret.POSTGRES_DB = os.Getenv("POSTGRES_DB")
+	config.Secret.POSTGRES_USER = os.Getenv("POSTGRES_USER")
 
 	// init log system
 	logger = log.Default()
 	logger.SetOutput(os.Stdout)
 
-	// set default config folder in user default directory
-
-	dirPATH = filepath.Join(config.Database.Path)
-	dbPATH = filepath.Join(dirPATH, DB_NAME)
-	os.MkdirAll(dirPATH, os.ModePerm)
-
-	// setup db connection
-	dbc, err = gorm.Open(sqlite.Open(dbPATH), &gorm.Config{})
-	if err != nil {
-		logger.Panic("failed to connect database on path " + dbPATH + ": " + err.Error())
-	}
-
 	// godump.Dump(config)
 }
 
-func GetDBC() *gorm.DB {
-	return dbc
+func SetuDbConnection(ctx context.Context) {
+	var err error
+
+	PGSQL_STRING = fmt.Sprintf(PGSQL_STRING, config.Secret.POSTGRES_USER, config.Secret.POSTGRES_PASSWORD, "timescaledb", config.Secret.POSTGRES_DB)
+
+	poolConfig, err := pgxpool.ParseConfig(PGSQL_STRING)
+	if err != nil {
+		panic("Unable to parse database config: " + err.Error())
+	}
+
+	poolConfig.MaxConns = 10
+	poolConfig.MinConns = 2
+
+	dbc, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	if err != nil {
+		panic("Unable to connect to database: " + err.Error())
+	}
+
+	err = dbc.Ping(ctx)
+	if err != nil {
+		panic("Unable to ping database: " + err.Error())
+	}
 }
 
-func GetUserDir() string {
-	return dirPATH
+func CloseDbConnection() {
+	if dbc != nil {
+		dbc.Close()
+	}
+}
+
+func GetDBC() *pgxpool.Pool {
+	return dbc
 }
 
 func GetLogger() *log.Logger {

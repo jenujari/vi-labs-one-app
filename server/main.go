@@ -19,6 +19,13 @@ func init() {
 
 func main() {
 	masterCtx = helpers.GetProcessContext()
+
+	config.SetuDbConnection(masterCtx.CTX)
+
+	defer func() {
+		config.CloseDbConnection()
+	}()
+
 	masterCtx.AddWorker(1)
 	srv := router.GetServer()
 

@@ -11,10 +11,13 @@ type Config struct {
 		Path string `mapstructure:"path"`
 	} `mapstructure:"database"`
 	Secret struct {
-		UserName  string
-		Password  string
-		Secret    string
-		ApiKey    string
-		ApiSecret string
+		UserName          string
+		Password          string
+		Secret            string
+		ApiKey            string
+		ApiSecret         string
+		POSTGRES_PASSWORD string
+		POSTGRES_DB       string
+		POSTGRES_USER     string
 	}
 }

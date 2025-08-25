@@ -1,0 +1,24 @@
+-- name: GetCache :one
+SELECT * FROM tbl_cache
+WHERE key = $1 LIMIT 1;
+
+-- name: ListSymbols :many
+SELECT * FROM tbl_seven_fifty
+ORDER BY id ASC;
+
+-- name: CreateCache :one
+INSERT INTO tbl_cache (
+  key, value, created
+) VALUES (
+  $1, $2, $3
+)
+RETURNING *;
+
+-- name: UpdateCache :exec
+UPDATE tbl_cache
+  set value = $2
+WHERE key = $1;
+
+-- name: DeleteCache :exec
+DELETE FROM tbl_cache
+WHERE key = $1;

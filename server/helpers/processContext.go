@@ -13,14 +13,14 @@ import (
 var pc *ProcessContext
 
 type ProcessContext struct {
-	interrupted bool
-
 	done           chan bool
 	interrupt      chan os.Signal
 	FatalErrorChan chan error
 
 	CTX    context.Context
 	cancel context.CancelFunc
+
+	interruptOnce *sync.Once
 
 	WG *sync.WaitGroup
 }
@@ -36,7 +36,7 @@ func InitProcessContext() {
 	pc.done = make(chan bool)
 	pc.FatalErrorChan = make(chan error)
 	pc.interrupt = make(chan os.Signal)
-	pc.interrupted = false
+	pc.interruptOnce = new(sync.Once)
 }
 
 func (ctx *ProcessContext) AddWorker(n int) {
@@ -59,13 +59,10 @@ func (ctx *ProcessContext) handleInterrupt() {
 	signal.Notify(ctx.interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	for range ctx.interrupt {
-		if ctx.interrupted {
-			config.GetLogger().Println("\nInterrupt signal already captured working on closing the process.")
-			continue
-		}
-		ctx.interrupted = true
-		ctx.cancel()
-		config.GetLogger().Println("Interuppt signal captured.")
+		ctx.interruptOnce.Do(func() {
+			ctx.cancel()
+			config.GetLogger().Println("First interrupt signal captured.")
+		})
 	}
 }
 

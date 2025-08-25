@@ -61,6 +61,10 @@ goose:
 	cd data && goose $(CMD)
 
 
+sqlc:
+	docker run --rm -v $(PWD_PATH)/server/sqlc:/src -w /src sqlc/sqlc generate
+
+
 zip-pgadmin:
 	7z a -tzip -p$(SEVEN_ZIP_PASSWORD) -mem=AES256 pgadmin.zip ./data/pg-admin
 
