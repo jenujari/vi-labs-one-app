@@ -37,20 +37,20 @@ func init() {
 	config.GetLogger().Println("server initialization complete.")
 }
 
-func RunServer(ctx *helpers.ProcessContext) {
-	defer ctx.CompleteOneWorker()
+func RunServer(pc *helpers.ProcessContext) {
+	defer pc.CompleteOneWorker()
 
 	go func(cmdx *helpers.ProcessContext) {
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			cmdx.FatalErrorChan <- fmt.Errorf("ListenAndServe(): %v", err)
 		}
-	}(ctx)
+	}(pc)
 
 	// helper.HitBrowser("http://localhost:5456", j)
 
-	<-ctx.CTX.Done()
+	<-pc.CTX.Done()
 	config.GetLogger().Println("shutting down server...")
-	if err := server.Shutdown(ctx.CTX); err != nil {
+	if err := server.Shutdown(pc.CTX); err != nil {
 		panic(err) // failure/timeout shutting down the server gracefully
 	}
 	config.GetLogger().Println("server shutdown complete...")
