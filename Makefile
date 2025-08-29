@@ -14,26 +14,28 @@ endif
 .PHONY: up
 
 t1:
-	@echo "Running $(SEVEN_ZIP_PASSWORD)"
+	@echo "Running $(POSTGRES_DB)"
 
-test:
-	docker run --rm -it --name=test \
-	 -v ${PWD_PATH}/data:/data \
-	 -w /data \
-	 datacatering/duckdb:v1.3.2
+# test:
+# 	cd headless && docker build -t headless-test . && docker run --rm -it -p 7878:7878 headless-test
 
-duck:
-	duckdb ${PWD_PATH}/data/db/data.db -ui
-
-
-tidy:
-	docker run --rm -it --name=test \
+tidy-server:
+	docker run --rm -it --name=tidy-server \
 	 -v ${PWD_PATH}/server:/go/src/app \
 	 -w /go/src/app \
 	 --pid=host \
 	 golang:$(GO_VERSION) \
 	 go mod tidy
 
+tidy-headless:
+	docker run --rm -it --name=tidy-headless \
+	 -v ${PWD_PATH}/headless:/go/src/app \
+	 -w /go/src/app \
+	 --pid=host \
+	 golang:$(GO_VERSION) \
+	 go mod tidy
+
+tidy: tidy-headless tidy-server
 
 server-build:
 	cd server && \
@@ -43,8 +45,7 @@ server-build:
 # 	docker run -d -it --rm -p 8080:8080 -p 4000:4000 --name server-app-debug server-app-debug sleep infinity
 
 up:
-	docker compose  -f docker-compose.yml up -d
-
+	docker compose -f docker-compose.yml up -d
 
 up-infra:
 	docker compose  -f docker-compose.yml up -d timescaledb pgadmin
@@ -60,10 +61,8 @@ down:
 goose:
 	cd data && goose $(CMD)
 
-
 sqlc:
 	docker run --rm -v $(PWD_PATH)/server/sqlc:/src -w /src sqlc/sqlc generate
-
 
 zip-pgadmin:
 	7z a -tzip -p$(SEVEN_ZIP_PASSWORD) -mem=AES256 pgadmin.zip ./data/pg-admin
@@ -77,5 +76,11 @@ uzip-pgadmin:
 uzip-pgsql:
 	7z x pgsql.zip -p$(SEVEN_ZIP_PASSWORD) -o./data/pgsql/restoration
 
-# test:
-# 	go test ./...
+headless-test:
+	cd headless && go test ./...
+
+server-test:
+	cd server && go test ./...
+
+go-test: server-test headless-test
+

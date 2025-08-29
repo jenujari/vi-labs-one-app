@@ -1,0 +1,4 @@
+app:
+  name: Headless Service
+  port: 7878
+  debug: true

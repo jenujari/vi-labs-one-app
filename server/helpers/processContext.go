@@ -25,7 +25,11 @@ type ProcessContext struct {
 	WG *sync.WaitGroup
 }
 
-func GetProcessContext() *ProcessContext {
+func GetProcessContext() context.Context {
+	return pc.CTX
+}
+
+func GetMainProcess() *ProcessContext {
 	return pc
 }
 
@@ -81,4 +85,12 @@ func (ctx *ProcessContext) gracefullyExit() {
 	<-ctx.done
 	config.GetLogger().Println("Gracefully exit")
 	os.Exit(0)
+}
+
+func (ctx *ProcessContext) SetContextValue(key config.ContextKey, value any) {
+	ctx.CTX = context.WithValue(ctx.CTX, key, value)
+}
+
+func (ctx *ProcessContext) GetContextValue(key config.ContextKey) any {
+	return ctx.CTX.Value(key)
 }

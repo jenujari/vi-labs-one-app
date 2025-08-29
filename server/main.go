@@ -5,34 +5,37 @@ import (
 	"os"
 	"server/config"
 	"server/helpers"
+	"server/repository"
 
 	"server/router"
 
 	"github.com/goforj/godump"
 )
 
-var masterCtx *helpers.ProcessContext
+var masterProcess *helpers.ProcessContext
 
 func init() {
 	helpers.InitProcessContext()
 }
 
 func main() {
-	masterCtx = helpers.GetProcessContext()
+	masterProcess = helpers.GetMainProcess()
 
-	config.SetuDbConnection(masterCtx.CTX)
+	config.SetuDbConnection(masterProcess.CTX)
 
 	defer func() {
 		config.CloseDbConnection()
 	}()
 
-	masterCtx.AddWorker(1)
+	repository.InitRepository()
+
+	masterProcess.AddWorker(1)
 	srv := router.GetServer()
 
-	go router.RunServer(masterCtx)
+	go router.RunServer(masterProcess)
 	config.GetLogger().Println("Server is running at ", srv.Addr)
 
-	masterCtx.WaitForFinish()
+	masterProcess.WaitForFinish()
 }
 
 type Profile struct {
