@@ -1,5 +1,11 @@
 package config
 
+type ContextKey string
+
+const (
+	REPO_KEY ContextKey = "CONTEXT_REPOSITORY"
+)
+
 // Define a struct to hold the configuration values
 type Config struct {
 	App struct {
@@ -8,7 +14,8 @@ type Config struct {
 		Debug bool   `mapstructure:"debug"`
 	} `mapstructure:"app"`
 	Database struct {
-		Path string `mapstructure:"path"`
+		Domain string `mapstructure:"domain"`
+		Port   int    `mapstructure:"port"`
 	} `mapstructure:"database"`
 	Secret struct {
 		UserName          string

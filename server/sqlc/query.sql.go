@@ -11,13 +11,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createCache = `-- name: CreateCache :one
-INSERT INTO tbl_cache (
-  key, value, created
-) VALUES (
-  $1, $2, $3
-)
-RETURNING key, value, created
+const createCache = `-- name: CreateCache :exec
+INSERT INTO tbl_cache (key, value, created)
+VALUES ($1, $2, $3)
 `
 
 type CreateCacheParams struct {
@@ -26,11 +22,9 @@ type CreateCacheParams struct {
 	Created pgtype.Timestamptz
 }
 
-func (q *Queries) CreateCache(ctx context.Context, arg CreateCacheParams) (TblCache, error) {
-	row := q.db.QueryRow(ctx, createCache, arg.Key, arg.Value, arg.Created)
-	var i TblCache
-	err := row.Scan(&i.Key, &i.Value, &i.Created)
-	return i, err
+func (q *Queries) CreateCache(ctx context.Context, arg CreateCacheParams) error {
+	_, err := q.db.Exec(ctx, createCache, arg.Key, arg.Value, arg.Created)
+	return err
 }
 
 const deleteCache = `-- name: DeleteCache :exec
@@ -44,8 +38,10 @@ func (q *Queries) DeleteCache(ctx context.Context, key string) error {
 }
 
 const getCache = `-- name: GetCache :one
-SELECT key, value, created FROM tbl_cache
-WHERE key = $1 LIMIT 1
+SELECT key, value, created
+FROM tbl_cache
+WHERE key = $1
+LIMIT 1
 `
 
 func (q *Queries) GetCache(ctx context.Context, key string) (TblCache, error) {
@@ -56,7 +52,8 @@ func (q *Queries) GetCache(ctx context.Context, key string) (TblCache, error) {
 }
 
 const listSymbols = `-- name: ListSymbols :many
-SELECT id, symbol, full_name FROM tbl_seven_fifty
+SELECT id, symbol, full_name
+FROM tbl_seven_fifty
 ORDER BY id ASC
 `
 
@@ -82,7 +79,7 @@ func (q *Queries) ListSymbols(ctx context.Context) ([]TblSevenFifty, error) {
 
 const updateCache = `-- name: UpdateCache :exec
 UPDATE tbl_cache
-  set value = $2
+SET value = $2
 WHERE key = $1
 `
 
@@ -93,5 +90,24 @@ type UpdateCacheParams struct {
 
 func (q *Queries) UpdateCache(ctx context.Context, arg UpdateCacheParams) error {
 	_, err := q.db.Exec(ctx, updateCache, arg.Key, arg.Value)
+	return err
+}
+
+const upsertCache = `-- name: UpsertCache :exec
+INSERT INTO tbl_cache (key, value, created)
+VALUES ($1, $2, $3) ON CONFLICT (key) DO
+UPDATE
+SET value = EXCLUDED.value,
+  created = EXCLUDED.created
+`
+
+type UpsertCacheParams struct {
+	Key     string
+	Value   pgtype.Text
+	Created pgtype.Timestamptz
+}
+
+func (q *Queries) UpsertCache(ctx context.Context, arg UpsertCacheParams) error {
+	_, err := q.db.Exec(ctx, upsertCache, arg.Key, arg.Value, arg.Created)
 	return err
 }

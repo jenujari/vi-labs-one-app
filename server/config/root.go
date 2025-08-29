@@ -17,7 +17,7 @@ var (
 	dbc          *pgxpool.Pool
 	logger       *log.Logger
 	config       *Config
-	PGSQL_STRING = "postgres://%s:%s@%s:5432/%s"
+	PGSQL_STRING = "postgres://%s:%s@%s:%d/%s"
 )
 
 func init() {
@@ -58,7 +58,7 @@ func init() {
 func SetuDbConnection(ctx context.Context) {
 	var err error
 
-	PGSQL_STRING = fmt.Sprintf(PGSQL_STRING, config.Secret.POSTGRES_USER, config.Secret.POSTGRES_PASSWORD, "timescaledb", config.Secret.POSTGRES_DB)
+	PGSQL_STRING = fmt.Sprintf(PGSQL_STRING, config.Secret.POSTGRES_USER, config.Secret.POSTGRES_PASSWORD, config.Database.Domain, config.Database.Port, config.Secret.POSTGRES_DB)	
 
 	poolConfig, err := pgxpool.ParseConfig(PGSQL_STRING)
 	if err != nil {
@@ -68,7 +68,7 @@ func SetuDbConnection(ctx context.Context) {
 	poolConfig.MaxConns = 10
 	poolConfig.MinConns = 2
 
-	dbc, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	dbc, err = pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		panic("Unable to connect to database: " + err.Error())
 	}
@@ -77,6 +77,8 @@ func SetuDbConnection(ctx context.Context) {
 	if err != nil {
 		panic("Unable to ping database: " + err.Error())
 	}
+
+	fmt.Println("Connected to database successfully!")
 }
 
 func CloseDbConnection() {

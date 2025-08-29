@@ -3,4 +3,5 @@ app:
   port: 5859
   debug: true
 database:
-  path: /data/db
+  domain: timescaledb
+  port: 5432

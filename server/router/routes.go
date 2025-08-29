@@ -15,6 +15,7 @@ import (
 func SetRoutes(r *http.ServeMux) {
 	r.HandleFunc("/", Index)
 	r.HandleFunc("/dd", DD)
+	r.HandleFunc("/test", test)
 	r.HandleFunc("/authenticated", Authenticated)
 }
 
@@ -24,6 +25,27 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+}
+
+func test(w http.ResponseWriter, r *http.Request) {
+// 	pc := helpers.GetMainProcess()
+// 	repo := pc.GetContextValue(config.REPO_KEY).(*repository.Repository)
+
+// 	repo.SaveZerodhaAuth("some-token-value-ctx")
+// repo.GetZerodhaAuth()
+	// value, err := helpers.GetTOTP()
+
+	html := helpers.SetAuthTokenUsingBrowser()
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write([]byte(html))
+	
+	// if err != nil {
+	// 	helpers.DumpHTML(w, err)
+	// 	return
+	// }
+
+	// helpers.DumpHTML(w, value)
 }
 
 func DD(w http.ResponseWriter, r *http.Request) {
