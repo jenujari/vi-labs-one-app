@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS tbl_seven_fifty
     id smallserial NOT NULL,
     symbol character varying(500) NOT NULL,
     full_name text,
+    instrument_token integer,
+    exchange_token integer,
     CONSTRAINT prime_id PRIMARY KEY (id),
     CONSTRAINT unique_symbol UNIQUE (symbol)
 );

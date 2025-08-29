@@ -49,8 +49,8 @@ func getZerodhaTokenUsingBrowser(body map[string]any) {
 	opts := chromedp.DefaultExecAllocatorOptions[:]
 	opts = append(opts, chromedp.DisableGPU)
 	opts = append(opts, chromedp.Flag("blink-settings", "scriptEnabled=true"))
-	opts = append(opts, chromedp.Flag("headless", false))
-	opts = append(opts, chromedp.ExecPath("C:\\Users\\JenishJ\\Downloads\\chrome-win\\chrome.exe"))
+	// opts = append(opts, chromedp.Flag("headless", false))
+	// opts = append(opts, chromedp.ExecPath("C:\\Users\\JenishJ\\Downloads\\chrome-win\\chrome.exe"))
 
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()

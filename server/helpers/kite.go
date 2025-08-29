@@ -1,11 +1,12 @@
 package helpers
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"server/config"
 	"sync"
-	"time"
-
-	"github.com/pquerna/otp/totp"
 
 	kiteconnect "github.com/zerodha/gokiteconnect/v4"
 )
@@ -33,11 +34,48 @@ func GetKiteClient() *kiteconnect.Client {
 	return kiteClient
 }
 
-func SetAuthTokenUsingBrowser() string {
-	return ""
-}
+func GetRequestTokenUsingBrowser() (string, error) {
+	body := make(map[string]any)
+	kc := GetKiteClient()
 
-func GetTOTP() (string, error) {
-	secret := config.GetConfig().Secret.Secret
-	return totp.GenerateCode(secret, time.Now())
+	body["url"] = kc.GetLoginURL()
+	body["username"] = config.GetConfig().Secret.UserName
+	body["password"] = config.GetConfig().Secret.Password
+
+	buffer := new(bytes.Buffer)
+	err := json.NewEncoder(buffer).Encode(body)
+
+	if err != nil {
+		return "", err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, "http://headless-app:7878/zerodha-auth", buffer)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get auth token: %s", resp.Status)
+	}
+
+	var respBody map[string]any
+	err = json.NewDecoder(resp.Body).Decode(&respBody)
+	if err != nil {
+		return "", err
+	}
+
+	value, ok := respBody["request_token"].(string)
+
+	if !ok {
+		return "", fmt.Errorf("failed to get request token")
+	}
+
+	return value, nil
 }

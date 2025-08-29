@@ -30,3 +30,11 @@ func InitRepository() {
 func GetRepository() *Repository {
 	return repo
 }	
+
+func (r *Repository) GetSevenFiftySymbols() ([]sqlc.TblSevenFifty, error) {
+	return  r.q.ListSymbols(r.ctx)
+}
+
+func (r *Repository) UpdateSymbols(arg *sqlc.UpdateSymbolsParams) error {
+	return r.q.UpdateSymbols(r.ctx, *arg)
+}

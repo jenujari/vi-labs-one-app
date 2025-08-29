@@ -50,7 +50,8 @@ up:
 up-infra:
 	docker compose  -f docker-compose.yml up -d timescaledb pgadmin
 
-up-build: server-build up-infra
+# server-build
+up-build:  up-infra
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build --watch
 
 down:

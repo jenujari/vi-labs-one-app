@@ -52,8 +52,9 @@ func (q *Queries) GetCache(ctx context.Context, key string) (TblCache, error) {
 }
 
 const listSymbols = `-- name: ListSymbols :many
-SELECT id, symbol, full_name
+SELECT id, symbol, full_name, instrument_token, exchange_token
 FROM tbl_seven_fifty
+WHERE instrument_token IS NOT NULL
 ORDER BY id ASC
 `
 
@@ -66,7 +67,13 @@ func (q *Queries) ListSymbols(ctx context.Context) ([]TblSevenFifty, error) {
 	var items []TblSevenFifty
 	for rows.Next() {
 		var i TblSevenFifty
-		if err := rows.Scan(&i.ID, &i.Symbol, &i.FullName); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Symbol,
+			&i.FullName,
+			&i.InstrumentToken,
+			&i.ExchangeToken,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -90,6 +97,31 @@ type UpdateCacheParams struct {
 
 func (q *Queries) UpdateCache(ctx context.Context, arg UpdateCacheParams) error {
 	_, err := q.db.Exec(ctx, updateCache, arg.Key, arg.Value)
+	return err
+}
+
+const updateSymbols = `-- name: UpdateSymbols :exec
+UPDATE tbl_seven_fifty
+SET full_name = $2,
+  instrument_token = $3,
+  exchange_token = $4
+WHERE symbol = $1
+`
+
+type UpdateSymbolsParams struct {
+	Symbol          string
+	FullName        pgtype.Text
+	InstrumentToken pgtype.Int4
+	ExchangeToken   pgtype.Int4
+}
+
+func (q *Queries) UpdateSymbols(ctx context.Context, arg UpdateSymbolsParams) error {
+	_, err := q.db.Exec(ctx, updateSymbols,
+		arg.Symbol,
+		arg.FullName,
+		arg.InstrumentToken,
+		arg.ExchangeToken,
+	)
 	return err
 }
 

@@ -6,7 +6,14 @@ LIMIT 1;
 -- name: ListSymbols :many
 SELECT *
 FROM tbl_seven_fifty
+WHERE instrument_token IS NOT NULL
 ORDER BY id ASC;
+-- name: UpdateSymbols :exec
+UPDATE tbl_seven_fifty
+SET full_name = $2,
+  instrument_token = $3,
+  exchange_token = $4
+WHERE symbol = $1;
 -- name: CreateCache :exec
 INSERT INTO tbl_cache (key, value, created)
 VALUES ($1, $2, $3);

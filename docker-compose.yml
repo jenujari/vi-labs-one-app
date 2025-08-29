@@ -21,8 +21,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
     ports:
       - "5859:5859"
-    volumes:
-      - fs-data:/data
+    # volumes:
+      # - fs-data:/data
       # - fs-server:/app:rw
   timescaledb:
     image: timescale/timescaledb-ha:pg17

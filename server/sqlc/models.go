@@ -15,7 +15,9 @@ type TblCache struct {
 }
 
 type TblSevenFifty struct {
-	ID       int16
-	Symbol   string
-	FullName pgtype.Text
+	ID              int16
+	Symbol          string
+	FullName        pgtype.Text
+	InstrumentToken pgtype.Int4
+	ExchangeToken   pgtype.Int4
 }

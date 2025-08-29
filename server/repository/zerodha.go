@@ -9,23 +9,23 @@ import (
 )
 
 const (
-	ZERODHA_AUTH_TOKEN = "ZERODHA_AUTH_TOKEN"
+	ZERODHA_ACCESS_TOKEN = "ZERODHA_ACCESS_TOKEN"
 )
 
-func (r *Repository) SaveZerodhaAuth(token string) error {
-	in_ := sqlc.UpsertCacheParams{
-		Key:     ZERODHA_AUTH_TOKEN,
+func (r *Repository) SaveZerodhaAccessToken(token string) error {
+	in := sqlc.UpsertCacheParams{
+		Key:     ZERODHA_ACCESS_TOKEN,
 		Value:   pgtype.Text{String: token, Valid: true},
 		Created: pgtype.Timestamptz{Time: time.Now(), Valid: true},
 	}
 
-	return r.q.UpsertCache(r.ctx, in_)
+	return r.q.UpsertCache(r.ctx, in)
 }
 
-func (r *Repository) GetZerodhaAuth() (string, error) {
+func (r *Repository) GetZerodhaAccessToken() (string, error) {
 	now := time.Now()
 
-	cache, err := r.q.GetCache(r.ctx, ZERODHA_AUTH_TOKEN)
+	cache, err := r.q.GetCache(r.ctx, ZERODHA_ACCESS_TOKEN)
 	if err != nil {
 		return "", err
 	}

@@ -12,6 +12,7 @@ FROM chromedp/headless-shell:stable
 
 WORKDIR /app
 
+COPY ./config/conf.yml ./config/conf.yml
 COPY --from=builder /go/src/app/server_app server_app
 
 ENTRYPOINT ["./server_app"]

@@ -1,14 +1,14 @@
 
 services:
   headless:
-    image: headless-app-debug
-    container_name: headless-app-debug
+    image: headless-app
+    container_name: headless-app
     build:
       context: ./headless/
       dockerfile: Dockerfile
   server:
-    image: server-app-debug
-    container_name: server-app-debug
+    image: server-app
+    container_name: server-app
     build:
       context: ./server/
       dockerfile: Dockerfile.debug
